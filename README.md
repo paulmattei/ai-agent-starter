@@ -1,11 +1,11 @@
-# AI Agent with Code Execution
+# AI Agent with Multiple Tools
 
 [![Tests](https://github.com/paulmattei/ai-agent-starter/actions/workflows/test.yml/badge.svg)](https://github.com/paulmattei/ai-agent-starter/actions/workflows/test.yml)
 [![Deploy](https://github.com/paulmattei/ai-agent-starter/actions/workflows/deploy.yml/badge.svg)](https://github.com/paulmattei/ai-agent-starter/actions/workflows/deploy.yml)
 [![codecov](https://codecov.io/gh/paulmattei/ai-agent-starter/branch/main/graph/badge.svg)](https://codecov.io/gh/paulmattei/ai-agent-starter)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 
-A simple, clean AI agent built with [aisuite](https://github.com/andrewyng/aisuite) that provides secure code execution capabilities via [E2B](https://e2b.dev). Designed to run on [Fly.io](https://fly.io).
+A clean, production-ready AI agent template built with [aisuite](https://github.com/andrewyng/aisuite), featuring secure code execution ([E2B](https://e2b.dev)), web search ([Tavily](https://tavily.com)), and automated deployment to [Fly.io](https://fly.io) via GitHub Actions.
 
 ## Features
 
@@ -32,100 +32,53 @@ User Request → Flask API → aisuite Client → LLM
 
 📖 **[Full Architecture Documentation](ARCHITECTURE.md)**
 
-## Quick Start
+## Getting Started
 
-```bash
-# 1. Clone and install
-git clone <your-repo-url>
-cd ai-agent-starter
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# 2. Configure
-cp env.example .env
-# Edit .env and add your API keys
-
-# 3. Run
-python main.py
-
-# 4. Test it
-curl -X POST http://localhost:8080/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Calculate the first 10 Fibonacci numbers"}'
-```
-
-## Documentation
-
-- 📖 **[Architecture Guide](ARCHITECTURE.md)** - Complete system design and tool specifications
-- 🧪 **[Testing Guide](TESTING.md)** - Comprehensive testing documentation with diagrams and coverage matrices
-- 🚀 **[CI/CD Setup Guide](.github/CICD_SETUP.md)** - Complete CI/CD configuration and deployment guide
-- 📝 **[Changelog](CHANGELOG.md)** - Recent updates and features
-
-## Prerequisites
+### Prerequisites
 
 You'll need API keys for:
+- **OpenAI**: https://platform.openai.com/api-keys (or another LLM provider)
+- **E2B**: https://e2b.dev (for code execution)
+- **Tavily**: https://tavily.com (for web search)
 
-1. **OpenAI** (or another LLM provider): https://platform.openai.com/api-keys
-2. **E2B**: https://e2b.dev (for code execution)
-3. **Tavily**: https://tavily.com/ (for web search)
-
-## Local Development Setup
-
-### 1. Clone and Install
+### Installation
 
 ```bash
-# Create and activate virtual environment
+# Clone and install
+git clone git@github.com:paulmattei/ai-agent-starter.git
+cd ai-agent-starter
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
-```
 
-### 2. Configure Environment
-
-```bash
-# Copy example environment file
+# Configure environment
 cp env.example .env
-
-# Edit .env and add your API keys
+# Edit .env and add your API keys:
 # OPENAI_API_KEY=sk-...
 # E2B_API_KEY=e2b_...
 # TAVILY_API_KEY=tvly-...
-```
 
-### 3. Run Locally
-
-```bash
+# Run locally
 python main.py
 ```
 
 The server will start at `http://localhost:8080`
 
-### 4. Run Tests
-
-See **[TESTING.md](TESTING.md)** for comprehensive testing documentation.
+### Testing
 
 ```bash
-# Run all tests with pytest
+# Run all tests
 pytest
 
-# Run with coverage report
+# Run with coverage
 pytest --cov=tools --cov=utils --cov=main --cov-report=term
-
-# Run specific test suites
-pytest test_tools.py -v    # Unit tests (9 tests)
-pytest test_agent.py -v    # E2E tests (5 tests)
 ```
 
-**Test Coverage:** 14/14 tests passing (100%), 95%+ code coverage
+**CI/CD:** Automated testing on every push; auto-deploy to Fly.io on merge to main
 
-**CI/CD:** 
-- **CI**: Automated testing runs on every push/PR via GitHub Actions
-- **CD**: Automatic deployment to Fly.io on merge to main (after tests pass)
+See **[TESTING.md](TESTING.md)** for detailed testing documentation.
 
-### 5. Test the Agent
+### Try It Out
 
 ```bash
 # Health check
@@ -153,93 +106,34 @@ curl -X POST http://localhost:8080/chat \
   }'
 ```
 
-## Deploy to Fly.io
+## Deployment
 
-This project includes automatic deployment to Fly.io via GitHub Actions. Every push to `main` automatically deploys after tests pass.
+This project auto-deploys to Fly.io via GitHub Actions on every push to `main`.
 
-### Automatic Deployment (Recommended)
-
-**One-time setup:**
-
-1. **Install Fly CLI and create your app:**
-   ```bash
-   # macOS
-   brew install flyctl
-   
-   # Linux
-   curl -L https://fly.io/install.sh | sh
-   
-   # Login to Fly.io
-   flyctl auth login
-   
-   # Create the app (one time only)
-   flyctl apps create ai-agent-starter
-   ```
-
-2. **Set environment secrets in Fly.io:**
-   
-   **Easy way** (uses your `.env` file):
-   ```bash
-   ./scripts/set-fly-secrets.sh
-   ```
-   
-   **Manual way**:
-   ```bash
-   flyctl secrets set \
-     OPENAI_API_KEY=sk-... \
-     E2B_API_KEY=e2b_... \
-     TAVILY_API_KEY=tvly-... \
-     --app ai-agent-starter
-   ```
-
-3. **Create a scoped deploy token:**
-   
-   Use a scoped token (recommended by [Fly.io](https://fly.io/docs/security/tokens/)) instead of the all-powerful auth token:
-   
-   ```bash
-   # Create app-scoped deploy token (90 days expiry)
-   fly tokens create deploy \
-     --name "github-actions-cd" \
-     --expiry 2160h \
-     --app ai-agent-starter
-   ```
-
-4. **Add the token to GitHub Secrets:**
-   - Go to your GitHub repository → Settings → Secrets and variables → Actions
-   - Click "New repository secret"
-   - Name: `FLY_API_TOKEN`
-   - Value: (paste the token from step 3)
-   - **Remember:** Token expires in 90 days - set a reminder to rotate it!
-
-**Now you're all set!** Every push to `main` will automatically:
-1. Run all tests (unit + E2E)
-2. Deploy to Fly.io (only if tests pass)
-
-### Manual Deployment
-
-If you prefer to deploy manually:
+### Setup (One-time)
 
 ```bash
-# Login to Fly.io
-flyctl auth login
+# Install Fly CLI
+brew install flyctl  # macOS
+# OR: curl -L https://fly.io/install.sh | sh  # Linux
 
-# Deploy
-flyctl deploy
+# Create app
+flyctl auth login
+flyctl apps create ai-agent-starter
+
+# Set secrets (easy way)
+./scripts/set-fly-secrets.sh
+
+# Create deploy token and add to GitHub Secrets as FLY_API_TOKEN
+fly tokens create deploy --name "github-actions-cd" --expiry 2160h --app ai-agent-starter
 ```
 
-### Access Your Deployed Agent
+See **[CI/CD Setup Guide](.github/CICD_SETUP.md)** for detailed deployment instructions.
+
+### Manual Deploy
 
 ```bash
-# Get your app URL
-flyctl status
-
-# Test it
-curl https://ai-agent-starter.fly.dev/health
-
-# Chat with it
-curl -X POST https://ai-agent-starter.fly.dev/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Calculate the first 10 Fibonacci numbers"}'
+flyctl deploy
 ```
 
 ## API Reference
@@ -327,23 +221,6 @@ The current population of the Tokyo metro area in 2023 is approximately 37,194,0
 
 **Agent orchestrated:** Web search → Got population → Executed code → Calculated percentage
 
-## Switching AI Providers
-
-aisuite supports multiple providers. Just change the model parameter:
-
-```bash
-# OpenAI
-{"message": "Hello", "model": "openai:gpt-4o"}
-
-# Anthropic
-{"message": "Hello", "model": "anthropic:claude-3-5-sonnet-20241022"}
-
-# Google
-{"message": "Hello", "model": "google:gemini-1.5-pro"}
-```
-
-Don't forget to add the corresponding API keys to your environment!
-
 ## Project Structure
 
 ```
@@ -370,154 +247,59 @@ Don't forget to add the corresponding API keys to your environment!
 └── README.md               # This file
 ```
 
-## Logging & Monitoring
+## Configuration
 
-The agent uses Python's standard logging module for production-ready observability:
+### Agent Behavior
 
-- **Structured logs**: Standard format with timestamps and log levels
-- **Request tracing**: Each request is wrapped with clear start/end markers and timing information
-- **Tool execution tracking**: Detailed logs for sandbox creation, code execution, and cleanup
-- **HTTP request logging**: See all API calls to OpenAI, E2B, and Tavily
+The agent uses a system message for intelligent tool selection. Edit the `system_message` in `main.py` to customize behavior. Key settings:
+- **Max iterations**: `max_turns=3` (up to 3 tool calling rounds)
+- **Multi-tool orchestration**: Can combine tools for complex tasks
+- **Tool guidelines**: Math/code → `execute_code`, current events → `search_web`
 
-Example log output:
+### Logging
+
+Production-ready logging with timestamps, request tracing, and tool execution tracking:
+
 ```
-2025-10-18 14:56:06 [INFO] ================================================================================
 2025-10-18 14:56:06 [INFO] 📩 NEW CHAT REQUEST
 2025-10-18 14:56:06 [INFO] Model: openai:gpt-4o
-2025-10-18 14:56:06 [INFO] Message: Calculate fibonacci numbers
-2025-10-18 14:56:06 [INFO] 🤖 Starting AI agent processing...
-2025-10-18 14:56:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2025-10-18 14:56:07 [INFO] 🔧 Executing code in E2B sandbox...
-2025-10-18 14:56:07 [INFO] ✓ Sandbox created
-2025-10-18 14:56:08 [INFO] ✓ Execution completed
 2025-10-18 14:56:08 [INFO] ✅ CHAT REQUEST COMPLETED (total: 2.15s)
 ```
-
-## Agent Configuration
-
-The agent is configured with a system message that enables intelligent tool selection:
-
-```python
-system_message = """
-You are a helpful assistant that can write code and search the web to solve the user's problem.
-
-You have access to the following tools:
-- execute_code: Execute Python code in a sandbox for calculations, data analysis, and programming tasks
-- search_web: Search the web for real-time information, current events, or factual knowledge
-
-Guidelines:
-- For math, calculations, data analysis, or programming tasks → use execute_code
-- For current events, news, or real-time information → use search_web
-- You can combine both tools to solve complex problems
-- Always use tools to get accurate information rather than guessing
-"""
-```
-
-See `main.py` `/chat` endpoint for the complete current system message.
-
-This configuration:
-- Enables intelligent tool selection based on the task
-- Allows multi-tool orchestration for complex problems
-- Supports up to 3 tool calling iterations (`max_turns=3`)
-- Provides clear guidelines for when to use each tool
 
 ## Extending the Agent
 
 ### Add a New Tool
 
-1. Create `tools/your_tool.py`:
-```python
-from utils.logging import logger
-
-def your_tool(param: str) -> str:
-    """
-    Description of what your tool does.
-    
-    Args:
-        param (str): Description of parameter
-        
-    Returns:
-        str: Description of return value
-    """
-    logger.info(f"🔧 Using your_tool with {param}")
-    # Your tool logic here
-    return "result"
-```
-
+1. Create `tools/your_tool.py` with your function
 2. Register it in `tools/__init__.py`:
-```python
-from .your_tool import your_tool
+   ```python
+   from .your_tool import your_tool
+   AVAILABLE_TOOLS = [execute_code, search_web, your_tool]
+   ```
 
-AVAILABLE_TOOLS = [
-    execute_code,
-    search_web,
-    your_tool,  # Add here
-]
+### Switch LLM Provider
+
+Change the model parameter in requests:
+```bash
+# Anthropic
+{"message": "Hello", "model": "anthropic:claude-3-5-sonnet-20241022"}
+
+# Google
+{"message": "Hello", "model": "google:gemini-1.5-pro"}
 ```
 
-That's it! The tool is now available to the agent.
+## Documentation & Resources
 
-### Use a Different LLM Provider
+- 📖 **[Architecture Guide](ARCHITECTURE.md)** - System design and tool specifications
+- 🧪 **[Testing Guide](TESTING.md)** - Testing documentation and coverage matrices
+- 🚀 **[CI/CD Setup](.github/CICD_SETUP.md)** - Deployment configuration
+- 📝 **[Changelog](CHANGELOG.md)** - Recent updates
 
-```python
-# Change the default model in main.py's /chat endpoint
-model = data.get('model', 'anthropic:claude-3-5-sonnet-20241022')
-```
-
-### Modify Agent Behavior
-
-To change how the agent behaves, edit the `system_message` in the `/chat` endpoint in `main.py`. You can:
-- Allow the agent to answer without code execution
-- Add new tool descriptions
-- Change response formatting guidelines
-
-## Troubleshooting
-
-### Missing API Keys
-```
-Error: Missing environment variables: OPENAI_API_KEY
-```
-→ Make sure all required API keys are set in your `.env` file
-
-### Import Errors
-```
-ModuleNotFoundError: No module named 'aisuite'
-```
-→ Run `pip install -r requirements.txt`
-
-### Fly.io Deployment Issues
-```
-Error: failed to fetch an image or build from source
-```
-→ Make sure Docker is running and you have a valid Dockerfile
+**External Docs:**
+- [aisuite](https://github.com/andrewyng/aisuite) | [E2B](https://e2b.dev/docs) | [Fly.io](https://fly.io/docs) | [Tavily](https://docs.tavily.com)
 
 ## License
 
 MIT License - feel free to use this as a foundation for your own projects!
-
-## Contributing
-
-This is a simple boilerplate example. Feel free to fork and customize for your needs!
-
-## Testing
-
-See **[TESTING.md](TESTING.md)** for comprehensive testing documentation including:
-- Testing philosophy with visual pyramid
-- Complete tool specifications with I/O tables
-- Architecture diagrams for each tool
-- Detailed test breakdowns and coverage matrices
-- CI/CD recommendations
-- Performance benchmarks
-
-**Test Status:**
-- Unit Tests: 9/9 passing (100%)
-- E2E Tests: 5/5 passing (100%)
-- Coverage: 95%+ of code paths
-
-## Resources
-
-- [aisuite Documentation](https://github.com/andrewyng/aisuite)
-- [E2B Documentation](https://e2b.dev/docs)
-- [Fly.io Documentation](https://fly.io/docs)
-- [Tavily Documentation](https://docs.tavily.com)
 
