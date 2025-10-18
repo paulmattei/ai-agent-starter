@@ -92,8 +92,10 @@ def chat():
             max_turns=3  # Allow up to 3 tool calling iterations
         )
         
-        # Extract response
+        # Extract response - handle None content gracefully
         agent_response = response.choices[0].message.content
+        if agent_response is None:
+            agent_response = "I processed your request but did not generate a text response."
         
         # Log request completion
         total_time = time.time() - request_start

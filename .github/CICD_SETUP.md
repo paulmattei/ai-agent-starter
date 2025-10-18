@@ -13,11 +13,58 @@ This project uses GitHub Actions for **Continuous Integration (CI)** and **Conti
 - **Matrix**: Tests on Python 3.11 and 3.12
 
 ### CD Pipeline (`deploy.yml`)
-- **Triggers**: Every push to `main` branch only
+- **Triggers**: Automatically runs after `test.yml` completes successfully on `main` branch
 - **Actions**:
-  - Runs all tests first
-  - If tests pass, deploys to Fly.io
-  - If tests fail, deployment is skipped
+  - Waits for test workflow to complete
+  - Only deploys if all tests pass (both Python 3.11 and 3.12)
+  - Deploys to Fly.io
+- **Manual Trigger**: Can also be triggered manually via GitHub Actions UI
+
+### How They Work Together
+
+```
+Push to main
+     ↓
+test.yml runs (Python 3.11 & 3.12)
+     ↓
+┌────┴────┐
+│  PASS?  │
+└────┬────┘
+     │ YES
+     ↓
+deploy.yml triggers automatically
+     ↓
+Deploys to Fly.io
+     ↓
+  ✅ Done
+```
+
+If tests fail, deploy.yml never runs. This prevents broken code from reaching production.
+
+## How Workflow Dependencies Work
+
+The deployment uses GitHub Actions' `workflow_run` trigger:
+
+```yaml
+# In deploy.yml
+on:
+  workflow_run:
+    workflows: ["Tests"]        # Wait for "Tests" workflow
+    types: [completed]          # Trigger when it completes
+    branches: [main]            # Only on main branch
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Only run if Tests workflow succeeded
+```
+
+**Benefits:**
+- ✅ Tests run only once (no duplication)
+- ✅ Deployment automatically waits for test results
+- ✅ No manual setup required (no branch protection rules needed)
+- ✅ Can still deploy manually via GitHub Actions UI if needed
+- ✅ Saves CI/CD time and costs
 
 ## Setup Instructions
 
@@ -130,40 +177,45 @@ Trigger: Push/PR to main or develop
 ### CD Workflow (deploy.yml)
 
 ```yaml
-Trigger: Push to main
-├── Test Job
-│   ├── Checkout code
-│   ├── Set up Python (3.11, 3.12)
-│   ├── Install dependencies
-│   ├── Run unit tests
-│   └── Run E2E tests
-└── Deploy Job (only if tests pass)
+Trigger: When test.yml completes successfully on main branch
+├── Check: Did test.yml succeed?
+│   └── YES → Continue
+│   └── NO  → Skip deployment
+└── Deploy Job
     ├── Checkout code
     ├── Set up Fly.io CLI
     └── Deploy to Fly.io
 ```
+
+**Note:** Tests are NOT run in deploy.yml. It waits for test.yml to complete and only runs if tests passed.
 
 ## Deployment Process
 
 When you push to main:
 
 ```
-1. GitHub Actions triggers
-2. CI: Run all tests
-3. CI: Tests pass ✅
-4. CD: Deploy to Fly.io
-5. Fly.io: Build Docker image
-6. Fly.io: Deploy to production
-7. App available at: https://ai-agent-starter.fly.dev
+1. GitHub Actions: test.yml triggers
+2. test.yml: Run unit tests (Python 3.11 & 3.12)
+3. test.yml: Run E2E tests (Python 3.11 & 3.12)
+4. test.yml: Upload coverage to Codecov
+5. test.yml: All tests pass ✅
+6. GitHub Actions: deploy.yml triggers automatically
+7. deploy.yml: Deploy to Fly.io
+8. Fly.io: Build Docker image
+9. Fly.io: Deploy to production
+10. App available at: https://ai-agent-starter.fly.dev
 ```
 
 If tests fail:
 ```
-1. GitHub Actions triggers
-2. CI: Run all tests
-3. CI: Tests fail ❌
-4. CD: Deployment skipped (safety feature)
+1. GitHub Actions: test.yml triggers
+2. test.yml: Run tests
+3. test.yml: Tests fail ❌
+4. deploy.yml: Does NOT trigger (safety feature)
+5. No deployment happens - broken code stays off production
 ```
+
+**Key Point:** Tests run only ONCE (via test.yml). The deploy.yml workflow waits for test.yml results and only runs if tests passed on both Python versions.
 
 ## Monitoring
 
@@ -182,9 +234,8 @@ flyctl logs --app ai-agent-starter
 # Monitor deployment
 flyctl monitor --app ai-agent-starter
 
-# List and manage deploy tokens
-flyctl tokens list --app ai-agent-starter
-flyctl tokens list --scope org
+# List all your tokens
+flyctl tokens list
 
 # Revoke a token if compromised
 flyctl tokens revoke <token-id>
@@ -206,6 +257,13 @@ flyctl tokens revoke <token-id>
 - Check Fly.io secrets are set: `flyctl secrets list --app ai-agent-starter`
 - View deployment logs in GitHub Actions
 
+### Deployment doesn't trigger after tests pass
+- Check that you pushed to `main` branch (deploy.yml only watches main)
+- Wait 1-2 minutes - GitHub Actions can have a slight delay between workflows
+- Verify test.yml completed successfully (both Python 3.11 and 3.12)
+- Check Actions tab: both workflows should show in the list
+- If stuck, try manual deployment: Actions → Deploy to Fly.io → Run workflow
+
 ### App not responding after deployment
 ```bash
 # Check app status
@@ -223,7 +281,10 @@ flyctl apps restart ai-agent-starter
 ### GitHub Actions
 - Free for public repositories
 - 2,000 minutes/month for private repositories on free plan
-- Current usage: ~3-5 minutes per push to main
+- Current usage per push to main:
+  - test.yml: ~2-3 minutes (2 Python versions)
+  - deploy.yml: ~1 minute (deployment only, no tests)
+  - **Total: ~3-4 minutes** (50% faster than running tests twice!)
 
 ### Fly.io
 - Free tier: 3 shared-cpu-1x 256mb VMs (sufficient for this app)
@@ -283,7 +344,7 @@ fly tokens create deploy \
 # 3. Test deployment (push to main or trigger workflow)
 
 # 4. Revoke old token
-fly tokens list --app ai-agent-starter
+fly tokens list
 fly tokens revoke <old-token-id>
 ```
 
@@ -292,6 +353,7 @@ fly tokens revoke <old-token-id>
 ## Next Steps
 
 Consider adding:
+- [ ] Branch protection rules (optional - workflow dependencies already provide safety)
 - [ ] Staging environment (deploy develop branch to staging)
 - [ ] Manual approval for production deployments
 - [ ] Slack/Discord notifications on deployment
@@ -299,6 +361,8 @@ Consider adding:
 - [ ] Performance monitoring (e.g., Datadog, New Relic)
 - [ ] Database backups before deployment
 - [ ] Automated token rotation reminder (GitHub issue/calendar)
+
+**Note:** Branch protection is now optional since workflow dependencies ensure tests pass before deployment. However, branch protection adds an extra layer of safety by preventing direct pushes without PR review.
 
 ## Resources
 

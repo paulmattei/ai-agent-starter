@@ -108,6 +108,7 @@ def test_code_execution_task():
     
     assert response is not None, "No response received"
     assert "response" in response, "Response missing 'response' field"
+    assert response["response"] is not None, "Response content is None"
     
     answer = response["response"].lower()
     
@@ -132,6 +133,7 @@ def test_web_search_task():
     
     assert response is not None, "No response received"
     assert "response" in response, "Response missing 'response' field"
+    assert response["response"] is not None, "Response content is None"
     
     answer = response["response"].lower()
     
@@ -157,6 +159,7 @@ def test_combined_task():
     
     assert response is not None, "No response received"
     assert "response" in response, "Response missing 'response' field"
+    assert response["response"] is not None, "Response content is None"
     
     answer = response["response"].lower()
     
@@ -182,6 +185,7 @@ def test_complex_code_task():
     
     assert response is not None, "No response received"
     assert "response" in response, "Response missing 'response' field"
+    assert response["response"] is not None, "Response content is None"
     
     answer = response["response"].lower()
     
