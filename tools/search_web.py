@@ -5,7 +5,7 @@ Provides real-time web search capabilities for the AI agent.
 
 import os
 from tavily import TavilyClient
-from utils.logging import log_span
+from utils.logging import logger
 
 
 def search_web(query: str) -> str:
@@ -22,19 +22,19 @@ def search_web(query: str) -> str:
         >>> search_web("latest Python 3.12 features")
         "Search Results for 'latest Python 3.12 features':\n..."
     """
-    log_span(f"🔍 Searching web for: {query}", "tool")
+    logger.info(f"🔍 Searching web for: {query}")
     
     try:
         # Get API key
         api_key = os.getenv('TAVILY_API_KEY')
         if not api_key:
             error_msg = "TAVILY_API_KEY not found in environment variables"
-            log_span(f"✗ {error_msg}", "error")
+            logger.error(f"✗ {error_msg}")
             return error_msg
         
         # Initialize Tavily client
         client = TavilyClient(api_key=api_key)
-        log_span("✓ Tavily client initialized", "tool")
+        logger.info("✓ Tavily client initialized")
         
         # Perform search
         response = client.search(
@@ -68,13 +68,13 @@ def search_web(query: str) -> str:
             result_parts.append("No results found.")
         
         formatted_result = "\n".join(result_parts)
-        log_span(f"✓ Found {len(response.get('results', []))} results", "tool")
+        logger.info(f"✓ Found {len(response.get('results', []))} results")
         
         return formatted_result
         
     except Exception as e:
         error_msg = f"Web search failed: {str(e)}"
-        log_span(f"✗ {error_msg}", "error")
+        logger.error(f"✗ {error_msg}")
         return error_msg
 
 

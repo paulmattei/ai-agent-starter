@@ -13,7 +13,7 @@ jobbot/
 │   └── execute_code.py # E2B code execution tool
 ├── utils/              # Utility modules
 │   ├── __init__.py     # Utils exports
-│   └── logging.py      # Colored logging utilities
+│   └── logging.py      # Standard Python logging
 ├── requirements.txt    # Python dependencies
 ├── .env                # Environment variables (not in git)
 ├── env.example         # Example environment variables
@@ -51,9 +51,9 @@ Contains all tool functions that the AI agent can use:
 Shared utility functions:
 
 **`logging.py`**
-- Colored terminal output with ANSI codes
-- Timestamped log spans for tracing
-- Log levels: info, success, error, tool
+- Standard Python logging configuration
+- Structured output with timestamps and log levels
+- Works with gunicorn in production environments
 
 ## Adding New Tools
 
@@ -66,7 +66,7 @@ To add a new tool (for capabilities beyond code execution):
 Example for a web search tool:
 ```python
 # tools/search_web.py
-from utils.logging import log_span
+from utils.logging import logger
 
 def search_web(query: str) -> str:
     """
@@ -78,7 +78,7 @@ def search_web(query: str) -> str:
     Returns:
         str: Search results
     """
-    log_span(f"🔍 Searching web for: {query}", "tool")
+    logger.info(f"🔍 Searching web for: {query}")
     # Implementation here
     return results
 ```
@@ -116,7 +116,7 @@ Get API keys:
 2. **Single Responsibility**: Each module has one clear purpose
 3. **Easy Extension**: Adding new tools requires minimal changes
 4. **Clean Imports**: All tools imported from one registry
-5. **Good Logging**: Colored, timestamped logs for debugging
+5. **Production Logging**: Standard Python logging for production observability
 6. **Type Hints**: Functions use type annotations for clarity
 
 ## Running the Application
@@ -161,7 +161,7 @@ python test_agent.py
 **Test scenarios:**
 1. **Health Endpoint**: `/health` returns 200
 2. **Code Execution**: Fibonacci numbers - validates correct sequence in response
-3. **Web Search**: Capital of France - validates "Paris" is mentioned
+3. **Web Search**: Current weather in London - validates real-time search data
 4. **Combined Tools**: Tokyo population + calculation - validates both search and code results
 5. **Complex Code**: Prime numbers + sum - validates correct primes and sum (28)
 

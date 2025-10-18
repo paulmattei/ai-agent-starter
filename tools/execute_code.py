@@ -4,7 +4,7 @@ Provides safe Python code execution in isolated environments.
 """
 
 from e2b_code_interpreter import Sandbox
-from utils.logging import log_span
+from utils.logging import logger
 
 
 def execute_code(code: str) -> str:
@@ -17,12 +17,12 @@ def execute_code(code: str) -> str:
     Returns:
         str: Execution results including stdout, stderr, and any errors
     """
-    log_span("🔧 Executing code in E2B sandbox...", "tool")
-    log_span(f"Code: {code}", "tool")
+    logger.info("🔧 Executing code in E2B sandbox...")
+    logger.info(f"Code: {code}")
     
     try:
         sandbox = Sandbox.create()
-        log_span("✓ Sandbox created", "tool")
+        logger.info("✓ Sandbox created")
         
         try:
             execution = sandbox.run_code(code)
@@ -44,15 +44,15 @@ def execute_code(code: str) -> str:
             
             result = "\n".join(result_parts) if result_parts else "Code executed successfully with no output"
         
-            log_span(f"✓ Execution completed: {result[:100]}...", "tool")
+            logger.info(f"✓ Execution completed: {result[:100]}...")
             return result
             
         finally:
             sandbox.kill()
-            log_span("✓ Sandbox cleaned up", "tool")
+            logger.info("✓ Sandbox cleaned up")
     
     except Exception as e:
         error_msg = f"Sandbox execution failed: {str(e)}"
-        log_span(f"✗ {error_msg}", "error")
+        logger.error(f"✗ {error_msg}")
         return error_msg
 

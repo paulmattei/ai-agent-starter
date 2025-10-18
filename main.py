@@ -11,7 +11,7 @@ import aisuite as ai
 
 # Import tools and utilities
 from tools import AVAILABLE_TOOLS
-from utils.logging import log_span
+from utils.logging import logger
 
 # Load environment variables
 load_dotenv()
@@ -48,11 +48,11 @@ def chat():
         model = data.get('model', 'openai:gpt-4o')
         
         # Log request start
-        log_span("\n" + "=" * 80, "info")
-        log_span("📩 NEW CHAT REQUEST", "info")
-        log_span(f"Model: {model}", "info")
-        log_span(f"Message: {user_message}", "info")
-        log_span("=" * 80, "info")
+        logger.info("\n" + "=" * 80)
+        logger.info("📩 NEW CHAT REQUEST")
+        logger.info(f"Model: {model}")
+        logger.info(f"Message: {user_message}")
+        logger.info("=" * 80)
 
         system_message = """
         You are a helpful assistant that can write code and search the web to solve the user's problem.
@@ -76,7 +76,7 @@ def chat():
         tools = AVAILABLE_TOOLS
         
         # Log agent call start
-        log_span("🤖 Starting AI agent processing...", "info")
+        logger.info("🤖 Starting AI agent processing...")
 
         messages = [
             {"role": "system", "content": system_message},
@@ -97,10 +97,10 @@ def chat():
         
         # Log request completion
         total_time = time.time() - request_start
-        log_span("=" * 80, "success")
-        log_span(f"✅ CHAT REQUEST COMPLETED (total: {total_time:.2f}s)", "success")
-        log_span(f"Response: {agent_response}", "success")
-        log_span("=" * 80 + "\n", "success")
+        logger.info("=" * 80)
+        logger.info(f"✅ CHAT REQUEST COMPLETED (total: {total_time:.2f}s)")
+        logger.info(f"Response: {agent_response}")
+        logger.info("=" * 80 + "\n")
         
         # Return response
         return jsonify({
@@ -111,10 +111,10 @@ def chat():
     except Exception as e:
         # Log error
         total_time = time.time() - request_start
-        log_span("=" * 80, "error")
-        log_span(f"❌ CHAT REQUEST FAILED (total: {total_time:.2f}s)", "error")
-        log_span(f"Error: {str(e)}", "error")
-        log_span("=" * 80 + "\n", "error")
+        logger.error("=" * 80)
+        logger.error(f"❌ CHAT REQUEST FAILED (total: {total_time:.2f}s)")
+        logger.error(f"Error: {str(e)}")
+        logger.error("=" * 80 + "\n")
         
         return jsonify({"error": str(e)}), 500
 

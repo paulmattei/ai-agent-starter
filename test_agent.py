@@ -8,13 +8,13 @@ import time
 import requests
 from threading import Thread
 from dotenv import load_dotenv
-from utils.logging import log_span
+from utils.logging import logger
 
 # Load environment variables
 load_dotenv()
 
 # Test server configuration
-TEST_SERVER_URL = "http://localhost:8080"
+TEST_SERVER_URL = os.getenv("TEST_SERVER_URL", "http://localhost:8080")
 
 
 def start_test_server():
@@ -47,11 +47,11 @@ def chat_request(message: str, model: str = "openai:gpt-4o"):
     Returns:
         Response dict or None if failed
     """
-    log_span("\n" + "=" * 80, "info")
-    log_span(f"📩 HTTP REQUEST to /chat", "info")
-    log_span(f"Message: {message}", "info")
-    log_span(f"Model: {model}", "info")
-    log_span("=" * 80, "info")
+    logger.info("\n" + "=" * 80)
+    logger.info(f"📩 HTTP REQUEST to /chat")
+    logger.info(f"Message: {message}")
+    logger.info(f"Model: {model}")
+    logger.info("=" * 80)
     
     start_time = time.time()
     
@@ -68,25 +68,25 @@ def chat_request(message: str, model: str = "openai:gpt-4o"):
             data = response.json()
             agent_response = data.get("response", "")
             
-            log_span("=" * 80, "success")
-            log_span(f"✅ HTTP 200 OK (took {elapsed:.2f}s)", "success")
-            log_span(f"Response: {agent_response}", "success")
-            log_span("=" * 80 + "\n", "success")
+            logger.info("=" * 80)
+            logger.info(f"✅ HTTP 200 OK (took {elapsed:.2f}s)")
+            logger.info(f"Response: {agent_response}")
+            logger.info("=" * 80 + "\n")
             
             return data
         else:
-            log_span("=" * 80, "error")
-            log_span(f"❌ HTTP {response.status_code} (took {elapsed:.2f}s)", "error")
-            log_span(f"Error: {response.text}", "error")
-            log_span("=" * 80 + "\n", "error")
+            logger.error("=" * 80)
+            logger.error(f"❌ HTTP {response.status_code} (took {elapsed:.2f}s)")
+            logger.error(f"Error: {response.text}")
+            logger.error("=" * 80 + "\n")
             return None
             
     except Exception as e:
         elapsed = time.time() - start_time
-        log_span("=" * 80, "error")
-        log_span(f"❌ REQUEST FAILED (took {elapsed:.2f}s)", "error")
-        log_span(f"Error: {str(e)}", "error")
-        log_span("=" * 80 + "\n", "error")
+        logger.error("=" * 80)
+        logger.error(f"❌ REQUEST FAILED (took {elapsed:.2f}s)")
+        logger.error(f"Error: {str(e)}")
+        logger.error("=" * 80 + "\n")
         return None
 
 
@@ -97,10 +97,10 @@ def test_health_endpoint():
     
     try:
         response = requests.get(f"{TEST_SERVER_URL}/health", timeout=5)
-        log_span(f"GET /health → HTTP {response.status_code}", "info")
+        logger.info(f"GET /health → HTTP {response.status_code}")
         return response.status_code == 200
     except Exception as e:
-        log_span(f"Health check failed: {e}", "error")
+        logger.error(f"Health check failed: {e}")
         return False
 
 
@@ -113,7 +113,7 @@ def test_code_execution_task():
     response = chat_request(message)
     
     if not response or "response" not in response:
-        log_span("❌ No response received", "error")
+        logger.error("❌ No response received")
         return False
     
     answer = response["response"].lower()
@@ -124,11 +124,11 @@ def test_code_execution_task():
     
     missing = [num for num in expected_numbers if num not in answer]
     if missing:
-        log_span(f"❌ Response missing expected numbers: {missing}", "error")
-        log_span(f"Response was: {answer[:200]}", "error")
+        logger.error(f"❌ Response missing expected numbers: {missing}")
+        logger.error(f"Response was: {answer[:200]}")
         return False
     
-    log_span("✅ Response contains correct Fibonacci numbers", "success")
+    logger.info("✅ Response contains correct Fibonacci numbers")
     return True
 
 
@@ -138,25 +138,34 @@ def test_web_search_task():
     print("=" * 80)
     
     if not os.getenv('TAVILY_API_KEY'):
-        log_span("⏭️  Skipping web search test (TAVILY_API_KEY not set)", "info")
+        logger.info("⏭️  Skipping web search test (TAVILY_API_KEY not set)")
         return True
     
-    message = "What is the capital of France?"
+    # Use a question that requires current information (stock prices change daily)
+    message = "What is the current weather in London? Use web search to get real-time information."
     response = chat_request(message)
     
     if not response or "response" not in response:
-        log_span("❌ No response received", "error")
+        logger.error("❌ No response received")
         return False
     
     answer = response["response"].lower()
     
-    # Check that the response mentions Paris (should be found via search or knowledge)
-    if "paris" not in answer:
-        log_span("❌ Response doesn't mention Paris", "error")
-        log_span(f"Response was: {answer[:200]}", "error")
+    # Check that the response mentions London and weather-related terms
+    has_london = "london" in answer
+    has_weather_terms = any(term in answer for term in ["weather", "temperature", "celsius", "fahrenheit", "°", "degrees", "cloudy", "sunny", "rain"])
+    
+    if not has_london:
+        logger.error("❌ Response doesn't mention London")
+        logger.error(f"Response was: {answer[:200]}")
         return False
     
-    log_span("✅ Response contains correct answer (Paris)", "success")
+    if not has_weather_terms:
+        logger.error("❌ Response doesn't contain weather information")
+        logger.error(f"Response was: {answer[:200]}")
+        return False
+    
+    logger.info("✅ Response contains current weather information from web search")
     return True
 
 
@@ -166,14 +175,14 @@ def test_combined_task():
     print("=" * 80)
     
     if not os.getenv('TAVILY_API_KEY'):
-        log_span("⏭️  Skipping combined test (TAVILY_API_KEY not set)", "info")
+        logger.info("⏭️  Skipping combined test (TAVILY_API_KEY not set)")
         return True
     
     message = "Search for the population of Tokyo and calculate what 10% of that number is"
     response = chat_request(message)
     
     if not response or "response" not in response:
-        log_span("❌ No response received", "error")
+        logger.error("❌ No response received")
         return False
     
     answer = response["response"].lower()
@@ -185,16 +194,16 @@ def test_combined_task():
     has_calculation_terms = any(term in answer for term in ["10%", "percent", "10 percent", "million", "calculated"])
     
     if not has_tokyo:
-        log_span("❌ Response doesn't mention Tokyo", "error")
-        log_span(f"Response was: {answer[:200]}", "error")
+        logger.error("❌ Response doesn't mention Tokyo")
+        logger.error(f"Response was: {answer[:200]}")
         return False
     
     if not (has_numbers and has_calculation_terms):
-        log_span("❌ Response doesn't show calculation results", "error")
-        log_span(f"Response was: {answer[:200]}", "error")
+        logger.error("❌ Response doesn't show calculation results")
+        logger.error(f"Response was: {answer[:200]}")
         return False
     
-    log_span("✅ Response contains search results and calculation", "success")
+    logger.info("✅ Response contains search results and calculation")
     return True
 
 
@@ -207,7 +216,7 @@ def test_complex_code_task():
     response = chat_request(message)
     
     if not response or "response" not in response:
-        log_span("❌ No response received", "error")
+        logger.error("❌ No response received")
         return False
     
     answer = response["response"].lower()
@@ -221,16 +230,16 @@ def test_complex_code_task():
     has_sum = "28" in answer
     
     if found_primes < 4:  # At least 4 out of 5 primes should be mentioned
-        log_span(f"❌ Response mentions only {found_primes}/5 expected primes", "error")
-        log_span(f"Response was: {answer[:200]}", "error")
+        logger.error(f"❌ Response mentions only {found_primes}/5 expected primes")
+        logger.error(f"Response was: {answer[:200]}")
         return False
     
     if not has_sum:
-        log_span("❌ Response doesn't contain correct sum (28)", "error")
-        log_span(f"Response was: {answer[:200]}", "error")
+        logger.error("❌ Response doesn't contain correct sum (28)")
+        logger.error(f"Response was: {answer[:200]}")
         return False
     
-    log_span("✅ Response contains prime numbers and correct sum", "success")
+    logger.info("✅ Response contains prime numbers and correct sum")
     return True
 
 
@@ -257,17 +266,18 @@ if __name__ == "__main__":
     else:
         print("\n✅ All environment variables set\n")
     
-    # Start Flask server in background thread
-    log_span("🚀 Starting Flask server...", "info")
-    server_thread = Thread(target=start_test_server, daemon=True)
-    server_thread.start()
+    # Start Flask server in background thread (only if testing locally)
+    if TEST_SERVER_URL.startswith("http://localhost") or TEST_SERVER_URL.startswith("http://127.0.0.1"):
+        logger.info("🚀 Starting Flask server...")
+        server_thread = Thread(target=start_test_server, daemon=True)
+        server_thread.start()
     
     # Wait for server to be ready
     if not wait_for_server(TEST_SERVER_URL):
-        log_span("❌ Server failed to start", "error")
+        logger.error("❌ Server failed to start")
         exit(1)
     
-    log_span(f"✅ Server ready at {TEST_SERVER_URL}\n", "success")
+    logger.info(f"✅ Server ready at {TEST_SERVER_URL}\n")
     
     # Run test suite
     tests = [
@@ -284,7 +294,7 @@ if __name__ == "__main__":
             result = test_func()
             results.append((name, result))
         except Exception as e:
-            log_span(f"❌ Test '{name}' crashed: {e}", "error")
+            logger.error(f"❌ Test '{name}' crashed: {e}")
             results.append((name, False))
     
     # Print summary

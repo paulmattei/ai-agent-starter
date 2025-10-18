@@ -5,7 +5,6 @@ app = "jobbot-ai-agent"
 primary_region = "sjc"
 
 [build]
-  dockerfile = "Dockerfile"
 
 [env]
   PORT = "8080"
@@ -24,7 +23,7 @@ primary_region = "sjc"
     method = "GET"
     path = "/health"
 
-[[vm]]
+[vm]
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 512

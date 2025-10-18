@@ -11,10 +11,10 @@ A simple, clean AI agent built with [aisuite](https://github.com/andrewyng/aisui
 - 🤖 **Unified AI Interface**: Use aisuite to work with multiple LLM providers (OpenAI, Anthropic, Google, etc.)
 - 💻 **Code Execution**: Safe Python code execution in E2B sandboxes
 - 🔍 **Web Search**: Real-time information retrieval via Tavily
-- 📊 **Colored Logging**: Beautiful ANSI-colored logs with timestamps for debugging and monitoring
+- 📊 **Production Logging**: Standard Python logging with timestamps for debugging and monitoring
 - 🧪 **Full Testing**: Unit tests + E2E tests with complete tracing
 - 🏗️ **Modular Architecture**: Tools organized in `tools/` directory for easy extension
-- 🚀 **Production Ready**: Containerized and ready to deploy on Fly.io
+- 🚀 **Production Ready**: Containerized and deployed on Fly.io
 - 🎯 **Simple & Clean**: Minimal boilerplate, easy to understand and extend
 
 ## Architecture
@@ -158,19 +158,17 @@ curl -L https://fly.io/install.sh | sh
 iwr https://fly.io/install.ps1 -useb | iex
 ```
 
-### 2. Login and Launch
+### 2. Login and Deploy
 
 ```bash
-# Login to Fly.io
+# Login to Fly.io (required for deployment)
 flyctl auth login
 
-# Launch the app (first time)
-flyctl launch --no-deploy
+# Create the app
+flyctl apps create jobbot-ai-agent
 
 # Set your API keys as secrets
-flyctl secrets set OPENAI_API_KEY=sk-...
-flyctl secrets set E2B_API_KEY=e2b_...
-flyctl secrets set TAVILY_API_KEY=tvly-...
+flyctl secrets set OPENAI_API_KEY=sk-... E2B_API_KEY=e2b_... TAVILY_API_KEY=tvly-... --app jobbot-ai-agent
 
 # Deploy
 flyctl deploy
@@ -299,7 +297,7 @@ Don't forget to add the corresponding API keys to your environment!
 │   └── search_web.py       # Tavily web search
 ├── utils/                   # Utility modules
 │   ├── __init__.py
-│   └── logging.py          # Colored logging
+│   └── logging.py          # Standard Python logging
 ├── test_tools.py           # Unit tests (9 tests)
 ├── test_agent.py           # E2E tests with tracing (5 tests)
 ├── requirements.txt        # Python dependencies
@@ -312,23 +310,25 @@ Don't forget to add the corresponding API keys to your environment!
 
 ## Logging & Monitoring
 
-The agent includes a built-in colored logging system for easy debugging:
+The agent uses Python's standard logging module for production-ready observability:
 
-- **Color-coded logs**: Different colors for info (blue), success (green), errors (red), and tool execution (yellow)
-- **Timestamps**: Millisecond precision timestamps on every log entry
+- **Structured logs**: Standard format with timestamps and log levels
 - **Request tracing**: Each request is wrapped with clear start/end markers and timing information
 - **Tool execution tracking**: Detailed logs for sandbox creation, code execution, and cleanup
+- **HTTP request logging**: See all API calls to OpenAI, E2B, and Tavily
 
 Example log output:
 ```
-[12:34:56.789] ================================================================================
-[12:34:56.789] 📩 NEW CHAT REQUEST
-[12:34:56.790] Model: openai:gpt-4o
-[12:34:56.790] Message: Calculate fibonacci numbers
-[12:34:56.791] 🔧 Executing code in E2B sandbox...
-[12:34:57.123] ✓ Sandbox created
-[12:34:57.456] ✓ Execution completed
-[12:34:57.457] ✅ CHAT REQUEST COMPLETED (total: 0.67s)
+2025-10-18 14:56:06 [INFO] ================================================================================
+2025-10-18 14:56:06 [INFO] 📩 NEW CHAT REQUEST
+2025-10-18 14:56:06 [INFO] Model: openai:gpt-4o
+2025-10-18 14:56:06 [INFO] Message: Calculate fibonacci numbers
+2025-10-18 14:56:06 [INFO] 🤖 Starting AI agent processing...
+2025-10-18 14:56:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-18 14:56:07 [INFO] 🔧 Executing code in E2B sandbox...
+2025-10-18 14:56:07 [INFO] ✓ Sandbox created
+2025-10-18 14:56:08 [INFO] ✓ Execution completed
+2025-10-18 14:56:08 [INFO] ✅ CHAT REQUEST COMPLETED (total: 2.15s)
 ```
 
 ## Agent Configuration
@@ -365,7 +365,7 @@ This configuration:
 
 1. Create `tools/your_tool.py`:
 ```python
-from utils.logging import log_span
+from utils.logging import logger
 
 def your_tool(param: str) -> str:
     """
@@ -377,7 +377,7 @@ def your_tool(param: str) -> str:
     Returns:
         str: Description of return value
     """
-    log_span(f"🔧 Using your_tool with {param}", "tool")
+    logger.info(f"🔧 Using your_tool with {param}")
     # Your tool logic here
     return "result"
 ```

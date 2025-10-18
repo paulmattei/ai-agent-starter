@@ -332,7 +332,7 @@ test_agent.py (5 tests)
 │   └── POST /chat → Fibonacci numbers
 │
 ├── test_web_search_task()
-│   └── POST /chat → Capital of France
+│   └── POST /chat → Current weather in London
 │
 ├── test_combined_task()
 │   └── POST /chat → Tokyo population + calculation
@@ -370,9 +370,9 @@ test_agent.py (5 tests)
               ▼
     [4] Web Search Test
          │
-         ├─→ POST /chat ("Capital of France")
+         ├─→ POST /chat ("Current weather in London")
          ├─→ Server → Agent → search_web
-         └─→ Assert: Response contains "Paris"
+         └─→ Assert: Response contains weather data
               │
               ▼
     [5] Combined Tools Test
@@ -425,10 +425,10 @@ assert len(missing) == 0, f"Missing: {missing}"
 |-----------|-------|
 | **Method** | POST |
 | **Endpoint** | `/chat` |
-| **Request** | `{"message": "What is the capital of France?"}` |
-| **Expected Tools** | `search_web` (or direct answer) |
-| **Validation** | Response contains: "paris" (case-insensitive) |
-| **Purpose** | Verify web search or knowledge retrieval |
+| **Request** | `{"message": "What is the current weather in London? Use web search to get real-time information."}` |
+| **Expected Tools** | `search_web` |
+| **Validation** | Response contains: "london" + weather terms (temperature/celsius/degrees/etc.) |
+| **Purpose** | Verify web search with real-time data |
 
 #### Test 4: Combined Tools Task
 
@@ -521,11 +521,17 @@ assert found_primes >= 4 and has_sum
 ### Quick Reference
 
 ```bash
+# Activate virtual environment
+source venv/bin/activate
+
 # Unit tests (fast, ~10s)
 python test_tools.py
 
-# E2E tests (full API, ~30s)
+# E2E tests (local server, ~30s)
 python test_agent.py
+
+# Or test against deployed Fly.io app
+TEST_SERVER_URL=https://your-app-name.fly.dev python test_agent.py
 
 # Both test suites
 python test_tools.py && python test_agent.py
@@ -607,21 +613,20 @@ AI AGENT END-TO-END TEST SUITE (HTTP API)
 
 ✅ All environment variables set
 
-🚀 Starting Flask server...
-✅ Server ready at http://localhost:8080
+2025-10-18 15:56:03 [INFO] ✅ Server ready at http://localhost:8080
 
 
 📝 TEST 1: Health Endpoint
 ================================================================================
-GET /health → HTTP 200
+2025-10-18 15:56:03 [INFO] GET /health → HTTP 200
 
 📝 TEST 2: Code Execution Task
 ================================================================================
-📩 HTTP REQUEST to /chat
-Message: Calculate the first 10 Fibonacci numbers
-✅ HTTP 200 OK (took 3.34s)
-Response: The first 10 Fibonacci numbers are: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34
-✅ Response contains correct Fibonacci numbers
+2025-10-18 15:56:03 [INFO] 📩 HTTP REQUEST to /chat
+2025-10-18 15:56:03 [INFO] Message: Calculate the first 10 Fibonacci numbers
+2025-10-18 15:56:06 [INFO] ✅ HTTP 200 OK (took 3.10s)
+2025-10-18 15:56:06 [INFO] Response: The first 10 Fibonacci numbers are: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34
+2025-10-18 15:56:06 [INFO] ✅ Response contains correct Fibonacci numbers
 
 [... more tests ...]
 

@@ -24,18 +24,18 @@ def test_imports():
     
     Validates:
     - tools module exports AVAILABLE_TOOLS
-    - utils.logging exports log_span and Colors
+    - utils.logging exports logger
     """
     print("Testing imports...")
     
     try:
         from tools import AVAILABLE_TOOLS
-        from utils.logging import log_span, Colors
+        from utils.logging import logger
         
         # Validate types
         assert isinstance(AVAILABLE_TOOLS, list), "AVAILABLE_TOOLS should be a list"
-        assert callable(log_span), "log_span should be callable"
-        assert hasattr(Colors, 'BLUE'), "Colors should have color constants"
+        assert hasattr(logger, 'info'), "logger should have info method"
+        assert hasattr(logger, 'error'), "logger should have error method"
         
         print("✅ All imports successful")
         return True
@@ -49,22 +49,19 @@ def test_logging():
     Test logging utilities.
     
     Validates:
-    - log_span accepts all log levels
+    - logger has standard methods (info, error, warning, debug)
     - No exceptions thrown during logging
     """
     print("\nTesting logging utilities...")
     
     try:
-        from utils.logging import log_span
+        from utils.logging import logger
         
-        # Test all log levels
-        log_span("Info message", "info")
-        log_span("Success message", "success")
-        log_span("Error message", "error")
-        log_span("Tool message", "tool")
-        
-        # Test default level
-        log_span("Default level message")
+        # Test standard log levels
+        logger.info("Info message")
+        logger.error("Error message")
+        logger.warning("Warning message")
+        logger.debug("Debug message")
         
         print("✅ Logging works")
         return True
@@ -320,7 +317,7 @@ def test_tool_registry():
         # Check registry not empty
         assert len(AVAILABLE_TOOLS) > 0, "AVAILABLE_TOOLS is empty"
         
-        # Check all are callable
+        # Check all are callable functions
         assert all(callable(tool) for tool in AVAILABLE_TOOLS), "Not all tools are callable"
         
         # Check all have docstrings
