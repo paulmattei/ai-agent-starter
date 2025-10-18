@@ -1,5 +1,62 @@
 # Changelog
 
+## 2025-10-18 - Continuous Deployment Added
+
+### New Features
+- ✅ Automatic deployment to Fly.io via GitHub Actions
+- ✅ CD pipeline runs after successful tests on main branch
+- ✅ Deployment badge added to README
+- ✅ **Security**: Uses scoped deploy tokens following Fly.io best practices
+
+### Files Added
+```
+.github/workflows/
+  ├── test.yml            # CI: Run tests on push/PR
+  └── deploy.yml          # NEW: CD: Deploy to Fly.io on main
+.github/
+  ├── CICD_SETUP.md       # Complete CI/CD setup guide
+  ├── CD_QUICKSTART.md    # Quick 5-minute setup
+  └── workflows/README.md # Workflow documentation
+scripts/
+  ├── README.md           # Scripts documentation
+  └── set-fly-secrets.sh  # NEW: Auto-set Fly.io secrets from .env
+```
+
+### Setup Requirements (Updated for Security)
+To enable CD, create a **scoped deploy token** and add to GitHub Secrets:
+
+```bash
+# Create app-scoped token (90 days, custom name)
+fly tokens create deploy \
+  --name "github-actions-cd" \
+  --expiry 2160h \
+  --app ai-agent-starter
+```
+
+Then add as `FLY_API_TOKEN` in GitHub Settings → Secrets → Actions
+
+**Important Changes:**
+- ❌ **DON'T** use `fly auth token` (deprecated, all-powerful, short-lived)
+- ✅ **DO** use `fly tokens create deploy` (scoped, named, with expiry)
+- ✅ Set expiry times (90 days recommended)
+- ✅ Rotate tokens regularly
+
+See [Fly.io Token Best Practices](https://fly.io/docs/security/tokens/)
+
+### Deployment Flow
+```
+Push to main → Run tests (CI) → Tests pass → Deploy to Fly.io (CD)
+                              ↘ Tests fail → No deployment
+```
+
+### Benefits
+- **Zero-touch deployment**: Merge to main = automatic production deployment
+- **Safety**: Only deploys if all tests pass
+- **Speed**: No manual steps required
+- **Reliability**: Consistent deployment process every time
+
+---
+
 ## 2025-10-18 - Web Search Tool Added
 
 ### New Features

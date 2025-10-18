@@ -1,6 +1,7 @@
 # AI Agent with Code Execution
 
 [![Tests](https://github.com/paulmattei/ai-agent-starter/actions/workflows/test.yml/badge.svg)](https://github.com/paulmattei/ai-agent-starter/actions/workflows/test.yml)
+[![Deploy](https://github.com/paulmattei/ai-agent-starter/actions/workflows/deploy.yml/badge.svg)](https://github.com/paulmattei/ai-agent-starter/actions/workflows/deploy.yml)
 [![codecov](https://codecov.io/gh/paulmattei/ai-agent-starter/branch/main/graph/badge.svg)](https://codecov.io/gh/paulmattei/ai-agent-starter)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 
@@ -58,6 +59,7 @@ curl -X POST http://localhost:8080/chat \
 
 - 📖 **[Architecture Guide](ARCHITECTURE.md)** - Complete system design and tool specifications
 - 🧪 **[Testing Guide](TESTING.md)** - Comprehensive testing documentation with diagrams and coverage matrices
+- 🚀 **[CI/CD Setup Guide](.github/CICD_SETUP.md)** - Complete CI/CD configuration and deployment guide
 - 📝 **[Changelog](CHANGELOG.md)** - Recent updates and features
 
 ## Prerequisites
@@ -119,7 +121,9 @@ pytest test_agent.py -v    # E2E tests (5 tests)
 
 **Test Coverage:** 14/14 tests passing (100%), 95%+ code coverage
 
-**CI/CD:** Automated testing runs on every push via GitHub Actions. See `.github/SETUP_CI.md` for setup instructions.
+**CI/CD:** 
+- **CI**: Automated testing runs on every push/PR via GitHub Actions
+- **CD**: Automatic deployment to Fly.io on merge to main (after tests pass)
 
 ### 5. Test the Agent
 
@@ -151,43 +155,91 @@ curl -X POST http://localhost:8080/chat \
 
 ## Deploy to Fly.io
 
-### 1. Install Fly CLI
+This project includes automatic deployment to Fly.io via GitHub Actions. Every push to `main` automatically deploys after tests pass.
+
+### Automatic Deployment (Recommended)
+
+**One-time setup:**
+
+1. **Install Fly CLI and create your app:**
+   ```bash
+   # macOS
+   brew install flyctl
+   
+   # Linux
+   curl -L https://fly.io/install.sh | sh
+   
+   # Login to Fly.io
+   flyctl auth login
+   
+   # Create the app (one time only)
+   flyctl apps create ai-agent-starter
+   ```
+
+2. **Set environment secrets in Fly.io:**
+   
+   **Easy way** (uses your `.env` file):
+   ```bash
+   ./scripts/set-fly-secrets.sh
+   ```
+   
+   **Manual way**:
+   ```bash
+   flyctl secrets set \
+     OPENAI_API_KEY=sk-... \
+     E2B_API_KEY=e2b_... \
+     TAVILY_API_KEY=tvly-... \
+     --app ai-agent-starter
+   ```
+
+3. **Create a scoped deploy token:**
+   
+   Use a scoped token (recommended by [Fly.io](https://fly.io/docs/security/tokens/)) instead of the all-powerful auth token:
+   
+   ```bash
+   # Create app-scoped deploy token (90 days expiry)
+   fly tokens create deploy \
+     --name "github-actions-cd" \
+     --expiry 2160h \
+     --app ai-agent-starter
+   ```
+
+4. **Add the token to GitHub Secrets:**
+   - Go to your GitHub repository → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `FLY_API_TOKEN`
+   - Value: (paste the token from step 3)
+   - **Remember:** Token expires in 90 days - set a reminder to rotate it!
+
+**Now you're all set!** Every push to `main` will automatically:
+1. Run all tests (unit + E2E)
+2. Deploy to Fly.io (only if tests pass)
+
+### Manual Deployment
+
+If you prefer to deploy manually:
 
 ```bash
-# macOS
-brew install flyctl
-
-# Linux
-curl -L https://fly.io/install.sh | sh
-
-# Windows
-iwr https://fly.io/install.ps1 -useb | iex
-```
-
-### 2. Login and Deploy
-
-```bash
-# Login to Fly.io (required for deployment)
+# Login to Fly.io
 flyctl auth login
-
-# Create the app
-flyctl apps create ai-agent-starter
-
-# Set your API keys as secrets
-flyctl secrets set OPENAI_API_KEY=sk-... E2B_API_KEY=e2b_... TAVILY_API_KEY=tvly-... --app ai-agent-starter
 
 # Deploy
 flyctl deploy
 ```
 
-### 3. Access Your Deployed Agent
+### Access Your Deployed Agent
 
 ```bash
 # Get your app URL
 flyctl status
 
 # Test it
-curl https://your-app-name.fly.dev/health
+curl https://ai-agent-starter.fly.dev/health
+
+# Chat with it
+curl -X POST https://ai-agent-starter.fly.dev/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Calculate the first 10 Fibonacci numbers"}'
 ```
 
 ## API Reference
@@ -304,14 +356,18 @@ Don't forget to add the corresponding API keys to your environment!
 ├── utils/                   # Utility modules
 │   ├── __init__.py
 │   └── logging.py          # Standard Python logging
+├── scripts/                 # Deployment scripts
+│   ├── README.md           # Scripts documentation
+│   └── set-fly-secrets.sh  # Auto-set Fly.io secrets from .env
 ├── test_tools.py           # Unit tests (9 tests)
 ├── test_agent.py           # E2E tests with tracing (5 tests)
 ├── requirements.txt        # Python dependencies
 ├── Dockerfile              # Container configuration
-├── fly.toml               # Fly.io deployment config
+├── fly.toml                # Fly.io deployment config
+├── env.example             # Example environment variables
 ├── ARCHITECTURE.md         # Detailed architecture docs
-├── TESTING.md             # Comprehensive testing guide
-└── README.md              # This file
+├── TESTING.md              # Comprehensive testing guide
+└── README.md               # This file
 ```
 
 ## Logging & Monitoring
