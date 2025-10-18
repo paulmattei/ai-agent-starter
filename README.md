@@ -1,7 +1,7 @@
 # AI Agent with Code Execution
 
-[![Tests](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/test.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/YOUR_USERNAME/YOUR_REPO/branch/main/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/YOUR_REPO)
+[![Tests](https://github.com/paulmattei/ai-agent-starter/actions/workflows/test.yml/badge.svg)](https://github.com/paulmattei/ai-agent-starter/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/paulmattei/ai-agent-starter/branch/main/graph/badge.svg)](https://codecov.io/gh/paulmattei/ai-agent-starter)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 
 A simple, clean AI agent built with [aisuite](https://github.com/andrewyng/aisuite) that provides secure code execution capabilities via [E2B](https://e2b.dev). Designed to run on [Fly.io](https://fly.io).
