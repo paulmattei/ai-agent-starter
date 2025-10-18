@@ -220,7 +220,7 @@ If tests fail:
 ## Monitoring
 
 ### GitHub Actions
-- View workflow runs: `https://github.com/YOUR_USERNAME/YOUR_REPO/actions`
+- View workflow runs: `https://github.com/paulmattei/ai-agent-starter/actions`
 - Check badges in README for status
 
 ### Fly.io
