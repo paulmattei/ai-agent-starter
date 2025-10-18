@@ -45,3 +45,12 @@ Thumbs.db
 # Logs
 *.log
 
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+
+# Development
+WARP.md

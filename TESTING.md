@@ -666,40 +666,54 @@ RESULTS: 5/5 tests passed
 
 ## Continuous Integration
 
-### Recommended CI Pipeline
+### GitHub Actions + Codecov
 
-```yaml
-name: Test Suite
+This project uses **automated CI/CD** with GitHub Actions and Codecov for test automation and coverage reporting.
 
-on: [push, pull_request]
+#### Workflow Configuration
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      
-      - name: Run unit tests
-        env:
-          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
-          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-        run: python test_tools.py
-      
-      - name: Run E2E tests
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
-          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-        run: python test_agent.py
+See `.github/workflows/test.yml` for the complete workflow. It:
+
+- ✅ Runs on every push and pull request
+- ✅ Tests with Python 3.11 and 3.12
+- ✅ Executes unit and E2E tests with pytest
+- ✅ Generates coverage reports
+- ✅ Uploads to Codecov automatically
+- ✅ Updates README badges
+
+#### Setup Instructions
+
+See `.github/SETUP_CI.md` for detailed setup instructions including:
+
+- Adding GitHub secrets (API keys)
+- Connecting Codecov
+- Configuring badges
+- Troubleshooting common issues
+
+#### Running Tests Locally with Pytest
+
+```bash
+# Run all tests
+pytest
+
+# Run unit tests only
+pytest test_tools.py -v
+
+# Run E2E tests only
+pytest test_agent.py -v
+
+# Run with coverage report
+pytest --cov=tools --cov=utils --cov=main --cov-report=term --cov-report=xml
+
+# Run specific test
+pytest test_tools.py::test_execute_code_happy_path -v
 ```
+
+#### Coverage Configuration
+
+Coverage settings are defined in:
+- `.codecov.yml` - Codecov configuration (targets, thresholds)
+- `pytest.ini` - Pytest and coverage options
 
 ---
 

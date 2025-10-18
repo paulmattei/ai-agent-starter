@@ -16,3 +16,7 @@ python-dotenv>=1.0.0
 # ASGI server for production
 gunicorn>=21.2.0
 
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+

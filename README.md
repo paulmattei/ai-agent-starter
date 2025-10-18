@@ -1,7 +1,7 @@
 # AI Agent with Code Execution
 
-![Tests](https://img.shields.io/badge/tests-14%2F14-brightgreen)
-![Coverage](https://img.shields.io/badge/coverage-95%25-green)
+[![Tests](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/test.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/YOUR_USERNAME/YOUR_REPO/branch/main/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/YOUR_REPO)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 
 A simple, clean AI agent built with [aisuite](https://github.com/andrewyng/aisuite) that provides secure code execution capabilities via [E2B](https://e2b.dev). Designed to run on [Fly.io](https://fly.io).
@@ -106,14 +106,20 @@ The server will start at `http://localhost:8080`
 See **[TESTING.md](TESTING.md)** for comprehensive testing documentation.
 
 ```bash
-# Unit tests - 9 tests covering tool functions, error handling, edge cases
-python test_tools.py
+# Run all tests with pytest
+pytest
 
-# E2E tests - 5 tests covering full HTTP API flow with validation
-python test_agent.py
+# Run with coverage report
+pytest --cov=tools --cov=utils --cov=main --cov-report=term
+
+# Run specific test suites
+pytest test_tools.py -v    # Unit tests (9 tests)
+pytest test_agent.py -v    # E2E tests (5 tests)
 ```
 
 **Test Coverage:** 14/14 tests passing (100%), 95%+ code coverage
+
+**CI/CD:** Automated testing runs on every push via GitHub Actions. See `.github/SETUP_CI.md` for setup instructions.
 
 ### 5. Test the Agent
 
