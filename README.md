@@ -36,7 +36,7 @@ User Request → Flask API → aisuite Client → LLM
 ```bash
 # 1. Clone and install
 git clone <your-repo-url>
-cd jobbot
+cd ai-agent-starter
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -165,10 +165,10 @@ iwr https://fly.io/install.ps1 -useb | iex
 flyctl auth login
 
 # Create the app
-flyctl apps create jobbot-ai-agent
+flyctl apps create ai-agent-starter
 
 # Set your API keys as secrets
-flyctl secrets set OPENAI_API_KEY=sk-... E2B_API_KEY=e2b_... TAVILY_API_KEY=tvly-... --app jobbot-ai-agent
+flyctl secrets set OPENAI_API_KEY=sk-... E2B_API_KEY=e2b_... TAVILY_API_KEY=tvly-... --app ai-agent-starter
 
 # Deploy
 flyctl deploy

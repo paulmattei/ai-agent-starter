@@ -1,7 +1,7 @@
 # Fly.io configuration file
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 
-app = "jobbot-ai-agent"
+app = "ai-agent-starter"
 primary_region = "sjc"
 
 [build]

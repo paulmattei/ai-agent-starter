@@ -1,5 +1,5 @@
 """
-Tool registry for the jobbot AI agent.
+Tool registry for the ai-agent-starter AI agent.
 Provides a central location for all available tools.
 """
 

@@ -1,12 +1,12 @@
-# Jobbot Architecture
+# AI Agent Starter Architecture
 
 ## Overview
-Jobbot is a Flask-based AI agent with tool calling capabilities using aisuite and E2B code execution sandboxes.
+AI Agent Starter is a Flask-based AI agent with tool calling capabilities using aisuite and E2B code execution sandboxes.
 
 ## Project Structure
 
 ```
-jobbot/
+ai-agent-starter/
 ├── main.py              # Flask application and API routes
 ├── tools/               # Tool functions for AI agent
 │   ├── __init__.py     # Tool registry and exports

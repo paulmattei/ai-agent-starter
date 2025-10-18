@@ -1,5 +1,5 @@
 """
-Logging utilities for the jobbot application.
+Logging utilities for the ai-agent-starter application.
 Provides structured logging that works in both development and production.
 """
 
@@ -15,5 +15,5 @@ logging.basicConfig(
 )
 
 # Export configured logger for use across the application
-logger = logging.getLogger("jobbot")
+logger = logging.getLogger("ai-agent-starter")
 

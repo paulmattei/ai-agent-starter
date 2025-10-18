@@ -1,5 +1,5 @@
 """
-Utility modules for the jobbot application.
+Utility modules for the ai-agent-starter application.
 """
 
 from .logging import logger
