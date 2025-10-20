@@ -233,11 +233,13 @@ The current population of the Tokyo metro area in 2023 is approximately 37,194,0
 ├── utils/                   # Utility modules
 │   ├── __init__.py
 │   └── logging.py          # Standard Python logging
+├── tests/                   # Test suite
+│   ├── __init__.py
+│   ├── test_tools.py       # Unit tests (9 tests)
+│   └── test_agent.py       # E2E tests with tracing (5 tests)
 ├── scripts/                 # Deployment scripts
 │   ├── README.md           # Scripts documentation
 │   └── set-fly-secrets.sh  # Auto-set Fly.io secrets from .env
-├── test_tools.py           # Unit tests (9 tests)
-├── test_agent.py           # E2E tests with tracing (5 tests)
 ├── requirements.txt        # Python dependencies
 ├── Dockerfile              # Container configuration
 ├── fly.toml                # Fly.io deployment config

@@ -34,7 +34,7 @@ jobs:
           E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
         run: |
-          pytest test_tools.py -v --cov=tools --cov=utils --cov-report=xml --cov-report=term
+          pytest tests/test_tools.py -v --cov=tools --cov=utils --cov-report=xml --cov-report=term
       
       - name: Run E2E tests with coverage
         env:
@@ -42,7 +42,7 @@ jobs:
           E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
         run: |
-          pytest test_agent.py -v --cov=main --cov-append --cov-report=xml --cov-report=term
+          pytest tests/test_agent.py -v --cov=main --cov-append --cov-report=xml --cov-report=term
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

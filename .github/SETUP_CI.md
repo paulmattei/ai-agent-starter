@@ -121,10 +121,10 @@ Test the workflow locally before pushing:
 pip install -r requirements.txt
 
 # Run unit tests with coverage
-pytest test_tools.py -v --cov=tools --cov=utils --cov-report=xml
+pytest tests/test_tools.py -v --cov=tools --cov=utils --cov-report=xml
 
 # Run E2E tests with coverage
-pytest test_agent.py -v --cov=main --cov-append --cov-report=xml
+pytest tests/test_agent.py -v --cov=main --cov-append --cov-report=xml
 
 # View coverage report
 coverage report

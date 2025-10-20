@@ -7,8 +7,8 @@ Comprehensive guide to testing tools, test coverage, and validation strategies.
 ## Table of Contents
 1. [Testing Overview](#testing-overview)
 2. [Tool Specifications](#tool-specifications)
-3. [Unit Tests (test_tools.py)](#unit-tests)
-4. [End-to-End Tests (test_agent.py)](#end-to-end-tests)
+3. [Unit Tests (tests/test_tools.py)](#unit-tests)
+4. [End-to-End Tests (tests/test_agent.py)](#end-to-end-tests)
 5. [Test Coverage Matrix](#test-coverage-matrix)
 6. [Running Tests](#running-tests)
 
@@ -20,8 +20,8 @@ Comprehensive guide to testing tools, test coverage, and validation strategies.
 
 | Test Type | File | Purpose | Speed | External APIs |
 |-----------|------|---------|-------|---------------|
-| **Unit** | `test_tools.py` | Test tool functions in isolation | Fast (~10s) | Yes (Tavily, E2B) |
-| **E2E** | `test_agent.py` | Test full HTTP API flow | Slow (~30s) | Yes (Flask + Tools) |
+| **Unit** | `tests/test_tools.py` | Test tool functions in isolation | Fast (~10s) | Yes (Tavily, E2B) |
+| **E2E** | `tests/test_agent.py` | Test full HTTP API flow | Slow (~30s) | Yes (Flask + Tools) |
 
 ---
 
@@ -229,7 +229,7 @@ Search Results for 'Python programming language':
 ### Test Suite Structure
 
 ```
-test_tools.py (9 tests)
+tests/test_tools.py (9 tests)
 │
 ├── Infrastructure Tests (3)
 │   ├── test_imports()
@@ -323,7 +323,7 @@ test_tools.py (9 tests)
 ### Test Suite Structure
 
 ```
-test_agent.py (5 tests)
+tests/test_agent.py (5 tests)
 │
 ├── test_health_endpoint()
 │   └── GET /health → 200 OK
@@ -524,17 +524,20 @@ assert found_primes >= 4 and has_sum
 # Activate virtual environment
 source venv/bin/activate
 
-# Unit tests (fast, ~10s)
-python test_tools.py
+# Run all tests with pytest
+pytest
 
-# E2E tests (local server, ~30s)
-python test_agent.py
+# Unit tests only (fast, ~10s)
+pytest tests/test_tools.py
+
+# E2E tests only (local server, ~30s)
+pytest tests/test_agent.py
 
 # Or test against deployed Fly.io app
-TEST_SERVER_URL=https://your-app-name.fly.dev python test_agent.py
+TEST_SERVER_URL=https://your-app-name.fly.dev pytest tests/test_agent.py
 
-# Both test suites
-python test_tools.py && python test_agent.py
+# Run with verbose output
+pytest -v
 ```
 
 ### Test Output Examples
@@ -697,16 +700,16 @@ See `.github/SETUP_CI.md` for detailed setup instructions including:
 pytest
 
 # Run unit tests only
-pytest test_tools.py -v
+pytest tests/test_tools.py -v
 
 # Run E2E tests only
-pytest test_agent.py -v
+pytest tests/test_agent.py -v
 
 # Run with coverage report
 pytest --cov=tools --cov=utils --cov=main --cov-report=term --cov-report=xml
 
 # Run specific test
-pytest test_tools.py::test_execute_code_happy_path -v
+pytest tests/test_tools.py::test_execute_code_happy_path -v
 ```
 
 #### Coverage Configuration

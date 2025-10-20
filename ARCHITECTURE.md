@@ -135,10 +135,10 @@ python main.py
 
 ## Testing
 
-### Unit Tests (`test_tools.py`)
+### Unit Tests (`tests/test_tools.py`)
 Tests individual tool functions in isolation:
 ```bash
-python test_tools.py
+pytest tests/test_tools.py
 ```
 
 Validates:
@@ -147,10 +147,10 @@ Validates:
 - ✅ Tool registry is properly configured
 - ✅ Each tool executes successfully
 
-### End-to-End Tests (`test_agent.py`)
+### End-to-End Tests (`tests/test_agent.py`)
 Tests the full Flask API via HTTP requests with response validation:
 ```bash
-python test_agent.py
+pytest tests/test_agent.py
 ```
 
 **What it does:**

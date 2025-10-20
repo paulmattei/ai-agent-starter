@@ -7,8 +7,8 @@ This project uses GitHub Actions for **Continuous Integration (CI)** and **Conti
 ### CI Pipeline (`test.yml`)
 - **Triggers**: Every push and PR to `main` and `develop` branches
 - **Actions**: 
-  - Runs unit tests (`test_tools.py`)
-  - Runs E2E tests (`test_agent.py`)
+  - Runs unit tests (`tests/test_tools.py`)
+  - Runs E2E tests (`tests/test_agent.py`)
   - Uploads coverage to Codecov
 - **Matrix**: Tests on Python 3.11 and 3.12
 

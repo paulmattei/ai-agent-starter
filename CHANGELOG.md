@@ -75,7 +75,9 @@ utils/
   ├── logging.py         # Colored logging utilities
   └── __init__.py        # Utils exports
 
-test_tools.py            # Test suite for all tools
+tests/
+  ├── test_tools.py      # Unit tests for all tools
+  └── test_agent.py      # E2E tests
 ARCHITECTURE.md          # Complete architecture documentation
 ```
 
